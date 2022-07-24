@@ -29,18 +29,16 @@ function searchMovies() {
     searchList.classList.add('hide-search-list');
   }
 }
-function showMovies(movie) {
-searchList.innerHTML = '';
-for(let i =0; i < movie.length; i++){
-  let movieListitem =document.createElement('div');
-  movieListitem.dataset.id= movie[i].imdbID;
-  movieListitem.classList.add('search-list-item');
-  if(movie[i].Poster !== 'N/A')
-    moviePoster =movie[i].Poster;
-  else
-    moviePoster = `${image}`;
-  
-    movieListitem.innerHTML =`
+function showMovies(movies) {
+  searchList.innerHTML = '';
+  for (let i = 0; i < movies.length; i++) {
+    let movieListitem = document.createElement('div');
+    movieListitem.dataset.id = movies[i].imdbID;
+    movieListitem.classList.add('search-list-item');
+    if (movies[i].Poster !== 'N/A') moviePoster = movies[i].Poster;
+    else moviePoster = `${image}`;
+
+    movieListitem.innerHTML = `
     <div class="search-item-thumbnail">
     <img
       src="${moviePoster}"
@@ -48,15 +46,112 @@ for(let i =0; i < movie.length; i++){
     />
   </div>
   <div class="search-item-info">
-    <h2>${movie[i].Title}
+    <h2>${movies[i].Title}
 
     </h2>
 
-    <p>${movie[i].Year}</p>
+    <p>${movies[i].Year}</p>
   </div>
     `;
 
     searchList.appendChild(movieListitem);
-    
+  }
+
+  movieDetails();
 }
+
+function movieDetails() {
+  const searchListMovies = searchList.querySelectorAll('.search-list-item');
+  searchListMovies.forEach((movie) => {
+    movie.addEventListener('click', async () => {
+      searchList.classList.add('hide-search-list');
+      const result = await fetch(
+        `https://www.omdbapi.com/?i=${movie.dataset.id}&apikey=${apiKey}`
+      );
+      const movieInfo = await result.json();
+
+      displayMovieInfo(movieInfo);
+    });
+  });
 }
+
+function displayMovieInfo(details) {
+  resultGrid.innerHTML = `
+     <div class='movie-poster' >
+     <img src="${
+       details.Poster !== 'N/A'
+         ? details.Poster
+         : 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1024px-No_image_available.svg.png'
+     }">
+
+   </div>
+<div class='movie-info'>
+<h2 class='movie-Title'>
+${details.Title}    
+</h2>
+
+<ul>
+ <li class='year'>
+  Year: ${details.Year}
+ </li>
+ <li class='rated'>
+   Rate: ${details.Rated}
+ </li>
+ <li class='released'>
+   Released: ${details.Released}
+ </li>
+</ul>
+
+<p class= 'genre'>
+ <b>
+   Genre: ${details.Genre}
+ </b>
+ Comedy
+</p>
+
+<p class= 'plot'>
+<b>
+ Plot: ${details.Plot}
+</b>
+Hello
+</p>
+
+<p class= 'writer'>
+<b>
+Writer: ${details.Writer}
+</b>
+Hi
+</p>
+
+<p class= 'actors'>
+<b>
+Actors: ${details.Actors}
+</b>
+What
+</p>
+
+<p class= 'language'>
+<b>
+Language: ${details.Language}
+</b>
+No
+</p>
+
+<p class= 'awards'>
+<b>
+<i class='fasfa-award'>
+</i>
+</b>
+${details.Awards}
+</p>
+
+
+</div>
+     `;
+}
+
+window.addEventListener('click', (event) => {
+  if (event.target.className !== "search-info") {
+    searchList.classList.add('hide-search-list');
+  }
+});
